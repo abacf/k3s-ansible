@@ -1,0 +1,3 @@
+k3s_server_command_args: "--disable=traefik --disable=metrics-server"
+k3s_server_env: "staging"
+k3s_server_install_bin_path: /usr/local/bin/k3s

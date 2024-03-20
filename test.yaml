@@ -1,0 +1,16 @@
+---
+- name: Install k3s on server and agent
+  hosts: all
+  vars:
+    k3s_server_env: staging
+  become: true
+  tasks:
+    - name: Run prepare role
+      ansible.builtin.import_role:
+        name: k3s_prepare
+    - name: Run server role
+      ansible.builtin.import_role:
+        name: k3s_server
+    - name: Run server role
+      ansible.builtin.import_role:
+        name: k3s_agent

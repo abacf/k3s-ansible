@@ -1,0 +1,64 @@
+# role tasks
+- name: Set platform/version specific variables
+  ansible.builtin.include_vars: "{{ __rolename_vars_file }}"
+  loop:
+    - "{{ ansible_facts.os_family }}.yml"
+    - "{{ ansible_facts.distribution }}.yml"
+    - "{{ ansible_facts.distribution }}_{{ ansible_facts.distribution_major_version }}.yml"
+    - "{{ ansible_facts.distribution }}_{{ ansible_facts.distribution_version }}.yml"
+  vars:
+    __rolename_vars_file: "{{ role_path }}/vars/{{ item }}"
+  when: __rolename_vars_file is file
+
+- name: Checks if k3s is installed with the services correctly set
+  block:
+    - name: Check if k3s is installed
+      ansible.builtin.stat:
+        path: /usr/local/bin/k3s
+      register: k3s_bin_present
+    - name: Check if k3s is running
+      ansible.builtin.systemd_service:
+        name: "{{ item.service }}"
+      register: k3s_running
+      when:
+        - k3s_bin_present.stat.exists
+        - item.group in group_names
+      loop:
+        - { service: "k3s.service", group: "server" }
+        - { service: "k3s-agent.service", group: "agent" }
+    # - name: Check if the non-disabled services are present
+    #   kubernetes.core.k8s_info:
+    #     kind: Pod
+    #     namespace: kube-system
+    #   register: pods_info
+    #   when:
+    #     - k3s_bin_present.stat.exists
+    #     - k3s_running.changed
+    #   become: true
+    - name: Set facts
+      ansible.builtin.set_fact:
+        k3s_installed: "{{ k3s_bin_present.stat.exists and k3s_running.status.ActiveState == 'started' }}"
+  rescue:
+    - name: Set k3s_installed to false
+      ansible.builtin.set_fact:
+        k3s_installed: false
+    - name: Set k3s_running to false
+      ansible.builtin.set_fact:
+        k3s_running: false
+    - name: Set k3s_services_present to false
+      ansible.builtin.set_fact:
+        k3s_services_present: false
+
+- name: Fetch the install script
+  ansible.builtin.get_url:
+    url: https://get.k3s.io
+    dest: '{{ k3s_prepare_script_path }}'
+    owner: root
+    group: root
+    mode: "0755"
+  when: k3s_installed is not defined or not k3s_installed
+
+- name: Set the variable
+  ansible.builtin.set_fact:
+    k3s_prepare_needs_install: "{{ k3s_installed is not defined or not k3s_installed }}"
+    k3s_prepare_script: '{{ k3s_prepare_script_path }}'

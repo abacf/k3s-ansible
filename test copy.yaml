@@ -1,0 +1,47 @@
+---
+- name: Test k8s_info
+  hosts: all
+  vars:
+    k3s_addons:
+      - traefik
+      - metrics-server
+      - local-path-provisioner
+      - coredns
+  become: true
+  tasks:
+    - name: Get group_names
+      ansible.builtin.debug:
+        var: group_names
+    - name: Check if k3s is installed
+      ansible.builtin.stat:
+        path: /usr/local/bin/k3s
+      register: k3s_bin_present
+    - name: Check if k3s is running
+      ansible.builtin.systemd_service:
+        name: "k3s.service"
+      register: k3s_running
+      when: k3s_bin_present.stat.exists
+    - name: Print that
+      ansible.builtin.debug:
+        msg: '{{ "server" in group_names }}'
+      when: '"server" not in group_names'
+    - name: Check if the non-disabled services are present
+      kubernetes.core.k8s_info:
+        kubeconfig: /etc/rancher/k3s/k3s.yaml
+        kind: Pod
+        namespace: kube-system
+      register: pods_info
+    - name: Get all pod names
+      ansible.builtin.set_fact:
+        pod_names: "{{ pods_info.resources | map(attribute='metadata.name') | list }}"
+    - name: Print that
+      ansible.builtin.debug:
+        var: pod_names
+    - name: Are all addons here
+      ansible.builtin.set_fact:
+        addons: "{{ item in pod_names }}"
+      loop: "{{ k3s_addons }}"
+      register: results
+    - name: Print that
+      ansible.builtin.debug:
+        var: addons

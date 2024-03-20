@@ -1,0 +1,51 @@
+# role tasks
+- name: Set platform/version specific variables
+  ansible.builtin.include_vars: "{{ __rolename_vars_file }}"
+  loop:
+    - "{{ ansible_facts.os_family }}.yml"
+    - "{{ ansible_facts.distribution }}.yml"
+    - "{{ ansible_facts.distribution }}_{{ ansible_facts.distribution_major_version }}.yml"
+    - "{{ ansible_facts.distribution }}_{{ ansible_facts.distribution_version }}.yml"
+  vars:
+    __rolename_vars_file: "{{ role_path }}/vars/{{ item }}"
+  when: __rolename_vars_file is file
+
+- name: Install k3s server
+  when: 'k3s_prepare_needs_install is defined and k3s_prepare_needs_install and "server" in group_names'
+  vars:
+    ip_address: "{{ ansible_facts.default_ipv4.address }}"
+  block:
+    - name: Execute installer
+      ansible.builtin.command: '{{ k3s_prepare_script_path }} {{ k3s_server_command_args | default("") }}'
+      args:
+        creates: '{{ k3s_server_install_bin_path }}'
+
+    - name: Enable and start k3s
+      ansible.builtin.systemd_service:
+        name: k3s.service
+        state: started
+        enabled: true
+
+    - name: Fetch k3s file
+      ansible.builtin.fetch:
+        src: /etc/rancher/k3s/k3s.yaml
+        dest: "{{ inventory_dir }}/files/kube_config"
+        flat: true
+
+    - name: Get node token
+      ansible.builtin.fetch:
+        src: /var/lib/rancher/k3s/server/node-token
+        dest: "{{ inventory_dir }}/files/{{ k3s_server_env }}-node-token"
+        flat: true
+
+    - name: Set server URL to file
+      ansible.builtin.copy:
+        content: 'https://{{ ip_address }}:6443'
+        dest: "/tmp/{{ k3s_server_env }}-server-url"
+        mode: '0644'
+
+    - name: Get that file
+      ansible.builtin.fetch:
+        src: "/tmp/{{ k3s_server_env }}-server-url"
+        dest: "{{ inventory_dir }}/files/{{ k3s_server_env }}-server-url"
+        flat: true
