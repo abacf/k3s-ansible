@@ -1,0 +1,4 @@
+---
+# defaults file for kluctl_controller
+kluctl_controller_kluctl_version: v2.23.5
+kluctl_controller_kubeconfig: /etc/rancher/k3s/k3s.yaml

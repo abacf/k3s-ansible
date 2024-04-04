@@ -18,7 +18,7 @@
       register: k3s_bin_present
     - name: Check if k3s is running
       ansible.builtin.systemd_service:
-        name: "k3s.service"
+        name: k3s.service
       register: k3s_running
       when: k3s_bin_present.stat.exists
     - name: Print that

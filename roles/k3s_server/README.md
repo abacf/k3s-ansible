@@ -35,3 +35,7 @@ k3s_cluster:
   roles:
     - k3s_server
 ```
+
+## Author Information
+
+Nicolas `signed-log` FORMICHELLA - Florian `minzords` Blanchet

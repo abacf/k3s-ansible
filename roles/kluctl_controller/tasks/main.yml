@@ -1,0 +1,59 @@
+---
+# role tasks
+- name: Set platform/version specific variables
+  ansible.builtin.include_vars: "{{ __rolename_vars_file }}"
+  loop:
+    - "{{ ansible_facts.os_family }}.yml"
+    - "{{ ansible_facts.distribution }}.yml"
+    - "{{ ansible_facts.distribution }}_{{ ansible_facts.distribution_major_version }}.yml"
+    - "{{ ansible_facts.distribution }}_{{ ansible_facts.distribution_version }}.yml"
+  vars:
+    __rolename_vars_file: "{{ role_path }}/vars/{{ item }}"
+  when: __rolename_vars_file is file
+
+- name: Install klucl controller
+  when: "'server' in group_names"
+  block:
+    - name: Create temp_dir
+      ansible.builtin.tempfile:
+        state: directory
+        prefix: kluctl_controller_temp
+      register: temp_dir
+
+    - name: Download kluctl
+      ansible.builtin.get_url:
+        url: "https://github.com/kluctl/kluctl/releases/download/{{ kluctl_version }}/kluctl_{{ kluctl_version }}_linux_amd64.tar.gz"
+        dest: "{{ temp_dir.path }}"
+        mode: "0644"
+      when: kluctl_controller_kluctl_version is defined
+      vars:
+        kluctl_version: "{{ kluctl_controller_kluctl_version }}"
+
+    - name: Extract kluctl
+      ansible.builtin.unarchive:
+        src: "{{ temp_dir.path }}/kluctl_{{ kluctl_controller_kluctl_version }}_linux_amd64.tar.gz"
+        dest: "{{ temp_dir.path }}"
+        remote_src: true
+      when: kluctl_controller_kluctl_version is defined
+
+    - name: Move kluctl to /usr/local/bin
+      ansible.builtin.copy:
+        src: "{{ temp_dir.path }}/kluctl"
+        dest: /usr/local/bin/kluctl
+        mode: "0755"
+        remote_src: true
+      when: kluctl_controller_kluctl_version is defined
+
+    - name: Install controller
+      ansible.builtin.command: kluctl controller install -y
+      register: kluctl_controller_install
+      changed_when: kluctl_controller_install.rc == 0
+      environment:
+        KUBECONFIG: "{{ kluctl_controller_kubeconfig }}"
+      when: kluctl_controller_kluctl_version is defined
+
+    - name: Remove temp_dir
+      ansible.builtin.file:
+        path: "{{ temp_dir.path }}"
+        state: absent
+      when: kluctl_controller_kluctl_version is defined

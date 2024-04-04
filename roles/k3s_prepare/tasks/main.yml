@@ -1,3 +1,4 @@
+---
 # role tasks
 - name: Set platform/version specific variables
   ansible.builtin.include_vars: "{{ __rolename_vars_file }}"
@@ -11,6 +12,7 @@
   when: __rolename_vars_file is file
 
 - name: Checks if k3s is installed with the services correctly set
+  when: "'server' in group_names"
   block:
     - name: Check if k3s is installed
       ansible.builtin.stat:
@@ -24,8 +26,8 @@
         - k3s_bin_present.stat.exists
         - item.group in group_names
       loop:
-        - { service: "k3s.service", group: "server" }
-        - { service: "k3s-agent.service", group: "agent" }
+        - { service: k3s.service, group: server }
+        - { service: k3s-agent.service, group: agent }
     # - name: Check if the non-disabled services are present
     #   kubernetes.core.k8s_info:
     #     kind: Pod
@@ -52,7 +54,7 @@
 - name: Fetch the install script
   ansible.builtin.get_url:
     url: https://get.k3s.io
-    dest: '{{ k3s_prepare_script_path }}'
+    dest: "{{ k3s_prepare_script_path }}"
     owner: root
     group: root
     mode: "0755"
@@ -61,4 +63,4 @@
 - name: Set the variable
   ansible.builtin.set_fact:
     k3s_prepare_needs_install: "{{ k3s_installed is not defined or not k3s_installed }}"
-    k3s_prepare_script: '{{ k3s_prepare_script_path }}'
+    k3s_prepare_script: "{{ k3s_prepare_script_path }}"

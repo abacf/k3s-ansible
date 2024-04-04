@@ -1,9 +1,13 @@
+---
 k3s_cluster:
   children:
     server:
       hosts:
         prod1:
-          ansible_host: 192.168.1.200
+          ansible_user: user
+          ansible_host: 192.168.1.205
     agent:
-      prod2:
-        ansible_host: 192.168.1.201
+      hosts:
+        prod2:
+          ansible_user: user
+          ansible_host: 192.168.1.206

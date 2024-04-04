@@ -1,40 +1,38 @@
-Role Name
-=========
+# k3s server role
 
-A brief description of the role goes here.
+This role installs k3s as a server. It depends on the `k3s_prepare` role to prepare the host for k3s installation.
 
-**Only 1 server is supported at the moment.**
+## Variables
 
-Requirements
-------------
+The role is extracted from the group name. If the group name is `agent`, the role will install k3s as an agent, and join to the server.
 
-Any pre-requisites that may not be covered by Ansible itself or the role should be mentioned here. For instance, if the role uses the EC2 module, it may be a good idea to mention in this section that the boto package is required.
+**Only one server is currently supported if you use the `k3s_agent` role.**
 
-Role Variables
---------------
 
-A description of the settable variables for this role should go here, including any variables that are in defaults/main.yml, vars/main.yml, and any variables that can/should be set via parameters to the role. Any variables that are read from other roles and/or the global scope (ie. hostvars, group vars, etc.) should be mentioned here as well.
+Default being `staging`.
 
-Dependencies
-------------
+The Inventory file should look like this:
 
-A list of other roles hosted on Galaxy should go here, plus any details in regards to parameters that may need to be set for other roles, or variables that are used from other roles.
+```yaml
+k3s_cluster:
+  children:
+    server:
+      hosts:
+        192.16.35.11:
+    agent:
+      hosts:
+        192.16.35.12:
+        192.16.35.13:
+```
 
-Example Playbook
-----------------
+## Example Playbook
 
-Including an example of how to use your role (for instance, with variables passed in as parameters) is always nice for users too:
+```yaml
+- hosts: k3s_cluster
+  roles:
+    - k3s_server
+```
 
-    - hosts: servers
-      roles:
-         - { role: username.rolename, x: 42 }
+## Author Information
 
-License
--------
-
-BSD
-
-Author Information
-------------------
-
-An optional section for the role authors to include contact information, or a website (HTML is not allowed).
+Nicolas `signed-log` FORMICHELLA - Florian `minzords` Blanchet

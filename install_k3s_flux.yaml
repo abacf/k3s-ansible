@@ -14,3 +14,6 @@
     - name: Run server role
       ansible.builtin.import_role:
         name: k3s_agent
+    - name: Run kluctl_controller_role
+      ansible.builtin.include_role:
+        name: kluctl_controller

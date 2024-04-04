@@ -1,3 +1,4 @@
+---
 # Defaults for k3s role
 k3s_prepare_script_path: /tmp/install-k3s.sh
 k3s_prepare_k3s_addons:

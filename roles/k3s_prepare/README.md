@@ -1,6 +1,6 @@
 # k3s prepare role
 
-This role prepares the host for k3s installation. It checks if k3s is already installed and if it is, it will not install it again. It also checks if the host is a server or an agent and fetches the correct k3s installation script.
+This role prepares the host for k3s installation. It checks if k3s is already installed and if it is, it will not install it again. It also checks if the host is a server or an agent and fetches the k3s installation script.
 
 ## Variables
 
