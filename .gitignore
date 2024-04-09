@@ -1,2 +1,2 @@
 files/**/*
-!files/.gitkeep
+!files/.gitkeep*inventory.yaml

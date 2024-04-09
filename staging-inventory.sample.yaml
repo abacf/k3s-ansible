@@ -5,9 +5,9 @@ k3s_cluster:
       hosts:
         staging1:
           ansible_user: user
-          ansible_host: 192.168.1.200
+          ansible_host: 192.168.1.2
     agent:
       hosts:
         staging2:
           ansible_user: user
-          ansible_host: 192.168.1.201
+          ansible_host: 192.168.1.3
