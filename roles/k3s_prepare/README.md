@@ -1,10 +1,17 @@
 # k3s prepare role
 
-This role prepares the host for k3s installation. It checks if k3s is already installed and if it is, it will not install it again. It also checks if the host is a server or an agent and fetches the k3s installation script.
+This role prepares the host for k3s installation.
+
+- Checks if k3s is already installed and if it is, it will not install it again.
+- Fetches the k3s installation script.
+- It also checks if the host is a server or an agent
 
 ## Variables
 
-Role is extracted from the group name. If the group name is `server`, the role will install k3s as a server. If the group name is `agent`, the role will install k3s as an agent.
+Role is extracted from the group name.
+
+- If the group name is `server`, the role will prepare k3s as a server.
+- If the group name is `agent`, the role will prepare k3s as an agent.
 
 The Inventory file should look like this:
 

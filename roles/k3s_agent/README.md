@@ -1,15 +1,18 @@
 # k3s server role
 
-This role installs k3s as a server. It depends on the `k3s_prepare` role to prepare the host for k3s installation.
+This role installs k3s as a server.
+
+It depends on the `k3s_prepare` role to prepare the host for k3s installation.
 
 ## Variables
 
-The role is extracted from the group name. If the group name is `agent`, the role will install k3s as an agent, and join to the server.
+The role is extracted from the group name.
+
+- If the group name is `agent`, the role will :
+  - install k3s as an agent
+  - and join to the cluster.
 
 **Only one server is currently supported if you use the `k3s_agent` role.**
-
-
-Default being `staging`.
 
 The Inventory file should look like this:
 
@@ -30,7 +33,7 @@ k3s_cluster:
 ```yaml
 - hosts: k3s_cluster
   roles:
-    - k3s_server
+    - k3s_agent
 ```
 
 ## Author Information

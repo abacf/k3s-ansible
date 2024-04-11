@@ -1,6 +1,9 @@
 # Installs kluctl-controller on the cluster
 
-This role installs kluctl-controller on the cluster. It downloads the kluctl binary from the official repository and installs it in the `/usr/local/bin` directory.
+This role installs kluctl-controller on the cluster.
+
+- It downloads the kluctl binary from the official repository
+- Installs it in the `/usr/local/bin` directory.
 
 ## Variables
 
